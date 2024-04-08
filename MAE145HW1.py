@@ -2,8 +2,6 @@
 # Kaustubh Kanagalekar 
 # A16790822 
 from sympy import symbols, Eq
-import math 
-import matplotlib.pyplot as plt
 import numpy as np 
 
 ##########################################################
@@ -23,7 +21,7 @@ def computeLineThroughTwoPoints(p1, p2):
     a = -(y2-y1)
     c = -((x2-x1)*y1 - (y2-y1)*x1)
 
-    normalise =  math.sqrt(a**2 + b**2)
+    normalise =  (a**2 + b**2)**0.5
     a_norm = a/normalise
     b_norm = b/normalise
 
@@ -40,7 +38,7 @@ def computeDistancePointToLine(p1,p2,q):
     c = (computeLineThroughTwoPoints(p1,p2)[3])
     qx = q[0]
     qy = q[1]
-    distance = abs((a*qx + b*qy + c))/math.sqrt(a**2 + b**2)
+    distance = abs((a*qx + b*qy + c))/((a**2 + b**2)**0.5)
     return distance, a,b,c
     
 
@@ -48,55 +46,46 @@ print(computeDistancePointToLine([3,2],[4,5], [0,0]))
 print(computeDistancePointToLine([3,2],[4,5], [0,0])[0])
 #############################################################
 
-'''
-def computeDistancePointToSegment(p1,p2,q):
-    computeDistancePointToLine(p1,p2,q)
-    qx = q[0]
-    qy = q[1]
-    p1x = p1[0]
-    py1 = p1[1]
-    px2 = p2[0]
-    py2 = p2[1]
-
-    x = symbols('x')
-    y = symbols('y')
-    equation = Eq((px2-p1x)*y -(py2-py1)*x, (px2-p1x)*py1 - (py2-py1)*p1x)
-    #this equation should only be valid in the domain of [px1, px2]
-    b = (px2-p1x)
-    a = -(py2-py1)
-    c = -((px2-p1x)*py1 - (py2-py1)*p1x)
-    distance = abs((a*qx + b*qy + c))/math.sqrt(a**2 + b**2)
-    if 
-
-    if computeDistancePointToLine(p1,p2,q)[0] >= math.sqrt((p1x-qx)**2 + (py1-qy)**2):
-        w = 1
-    elif computeDistancePointToLine(p1,p2,q)[0] >= math.sqrt((px2-qx)**2 + (py2-qy)**2):
-        w = 2
-    else: 
-        w = 0
-    
-    return computeDistancePointToLine(p1,p2,q)[0], w
-'''
 
 def computeDistancePointToSegment(p1,p2,q):
     #finds the distance and indicates which point is the closest
-    qx = q[0]
-    qy = q[1]
-    px1 = p1[0]
-    py1 = p1[1]
-    px2 = p2[0]
-    py2 = p2[1]
+    if abs(p1[0] - p2[0]) >= 10**-8 or abs(p1[1] - p2[1]) >= 10**-8:
+        qx = q[0]
+        qy = q[1]
+        px1 = p1[0]
+        py1 = p1[1]
+        px2 = p2[0]
+        py2 = p2[1]
 
-    u = np.array([px2 - px1, py2 - py1])
-    v = np.array([qx - px1, qy - py1])
-    projection = u * np.dot(u, v)/np.dot(u,u) 
-    distance = np.linalg.norm(v - projection)
-    
-    if np.dot(u,v) < 0:
-        w = 1
-    elif np.dot(u,u) <= np.dot(u,v):
-        w = 2
-    else:
-        w = 0 
-    return distance, w
-print(computeDistancePointToSegment([7,5],[9,9], [8,12]))
+        u = np.array([px2 - px1, py2 - py1])
+        v = np.array([qx - px1, qy - py1])
+        projection = u * (u[0]*v[0] + u[1]*v[1])/(u[0]*u[0] + u[1]*u[1])
+        distance = v - projection
+        distance = (distance[0]**2 + distance[1]**2)**0.5
+        
+        if (u[0]*v[0] + u[1]*v[1]) < 0:
+            w = 1
+        elif (u[0]*u[0] + u[1]*u[1]) <= (u[0]*v[0] + u[1]*v[1]):
+            w = 2
+        else:
+            w = 0 
+        return distance, w
+    else:  
+        qx = q[0]
+        qy = q[1]
+        px1 = p1[0]
+        py1 = p1[1]
+        px2 = p2[0]
+        py2 = p2[1]
+        distance = ((qx-px1)**2 + (qy - px2)**2)**0.5
+        u = np.array([px2 - px1, py2 - py1])
+        v = np.array([qx - px1, qy - py1])
+        if (u[0]*v[0] + u[1]*v[1]) < 0:
+            w = 1
+        elif (u[0]*u[0] + u[1]*u[1]) <= (u[0]*v[0] + u[1]*v[1]):
+            w = 2
+        else:
+            w = 0 
+        return distance, w
+         
+print(computeDistancePointToSegment([7.02222,5.012],[7.02222,5.012], [7,4]))
